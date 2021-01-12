@@ -1,6 +1,6 @@
 local VBS = {}
 
-VBS._VERSION = "1.0 BETA"
+VBS._VERSION = "1.1 BETA"
 
 VBS.Buttons = {
     OkOnly = "vbOkOnly";
@@ -21,18 +21,38 @@ function VBS.Init()
     VBS.file = io.open(VBS.MainFile, 'w+')
 
     function VBS.Var(typ, name, value)
-        if typ == "Dim" then
-            assert(VBS.file:write("Dim "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
-        elseif typ == "Static" then
-            assert(VBS.file:write("Dim "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
-        elseif typ == "Public" then
-            assert(VBS.file:write("Public "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
-        elseif typ == "Private" then
-            assert(VBS.file:write("Private "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
-        elseif typ == "None" then
-            assert(VBS.file:write(name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
+        if value == nil then
+            if typ == "Dim" then
+                assert(VBS.file:write("Dim "..name.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Static" then
+                assert(VBS.file:write("Static "..name.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Public" then
+                assert(VBS.file:write("Public "..name.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Private" then
+                assert(VBS.file:write("Private "..name.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Set" then
+                error("Set cannot be used while the variable has no value!")
+            elseif typ == "None" then
+                error("None cannot be used while the variable has no value!")
+            else
+                error("Variable Type '"..typ.."' dont exist.")
+            end
         else
-            error("Variable Type '"..typ.."' dont exist.")
+            if typ == "Dim" then
+                assert(VBS.file:write("Dim "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Static" then
+                assert(VBS.file:write("Static "..name.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Public" then
+                assert(VBS.file:write("Public "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Private" then
+                assert(VBS.file:write("Private "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Set" then
+                assert(VBS.file:write("Set "..name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "None" then
+                assert(VBS.file:write(name.."="..value.."\n"), "Cannot open VBS, check if a proccess its using it")
+            else
+                error("Variable Type '"..typ.."' dont exist.")
+            end
         end
     end
 
@@ -45,6 +65,8 @@ function VBS.Init()
             assert(VBS.file:write("Public "..name.." As "..value.."\n"), "Cannot open VBS, check if a proccess its using it")
         elseif typ == "Private" then
             assert(VBS.file:write("Private "..name.." As "..value.."\n"), "Cannot open VBS, check if a proccess its using it")
+        elseif typ == "Set" then
+            assert(VBS.file:write("Set "..name.." As "..value.."\n"), "Cannot open VBS, check if a proccess its using it")
         elseif typ == "None" then
             assert(VBS.file:write(name.." As "..value.."\n"), "Cannot open VBS, check if a proccess its using it")
         else
@@ -159,10 +181,82 @@ function VBS.Init()
     function VBS.DoLoop()
         assert(VBS.file:write("Do\n\t"), "Cannot open VBS, check if a proccess its using it")
         function VBS.ExitDo()
-            assert(VBS.file:write('Exit Do\n'))
+            VBS.file:write('Exit Do\n')
         end
         function VBS.Loop()
             VBS.file:write('Loop')
+        end
+    end
+
+    function VBS.Select(var)
+        assert(VBS.file:write("Select case "..var.."\n\t"), "Cannot open VBS, check if a proccess its using it")
+        function VBS.Case(case)
+            VBS.file:write('case '..case)
+        end
+        function VBS.EndSelect()
+            VBS.file:write('End Select')
+        end
+    end
+
+    function VBS.Sub(typ, name, ...)
+        if ... == nil then
+            if typ == "Static" then
+                assert(VBS.file:write("Static Sub "..name.."()\n\t"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Public" then
+                assert(VBS.file:write("Public Sub "..name.."()\n\t"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Private" then
+                assert(VBS.file:write("Private Sub "..name.."()\n\t"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "None" then
+                assert(VBS.file:write("Sub "..name.."()\n\t"), "Cannot open VBS, check if a proccess its using it")
+            else
+                error("Function Type '"..typ.."' dont exist.")
+            end
+        else
+            if typ == "Static" then
+                assert(VBS.file:write("Static Sub "..name.."("..(...)..")\n\t"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Public" then
+                assert(VBS.file:write("Public Sub "..name.."("..(...)..")\n\t"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "Private" then
+                assert(VBS.file:write("Private Sub "..name.."("..(...)..")\n\t"), "Cannot open VBS, check if a proccess its using it")
+            elseif typ == "None" then
+                assert(VBS.file:write("Sub "..name.."("..(...)..")\n\t"), "Cannot open VBS, check if a proccess its using it")
+            else
+                error("Sub Type '"..typ.."' dont exist.")
+            end
+        end
+    end
+
+    function VBS.Class(name)
+        assert(VBS.file:write("Class "..name.."\n\t"), "Cannot open VBS, check if a proccess its using it")
+        function VBS.Property(typ, kyw, name, ...)
+            if ... == nil then
+                if typ == "Static" then
+                    VBS.file:write("Static Property "..kyw.." "..name.."()\n\t")
+                elseif typ == "Public" then
+                    VBS.file:write("Public Property "..kyw.." "..name.."()\n\t")
+                elseif typ == "Private" then
+                    VBS.file:write("Private Property "..kyw.." "..name.."()\n\t")
+                elseif typ == "None" then
+                    VBS.file:write("Property "..kyw.." "..name.."()\n\t")
+                else
+                    error("Property Type '"..typ.."' dont exist.")
+                end
+            else
+                if typ == "Static" then
+                    VBS.file:write("Static Property "..kyw.." "..name.."("..(...)..")\n\t")
+                elseif typ == "Public" then
+                    VBS.file:write("Public Property "..kyw.." "..name.."("..(...)..")\n\t")
+                elseif typ == "Private" then
+                    VBS.file:write("Private Property "..kyw.." "..name.."("..(...)..")\n\t")
+                elseif typ == "None" then
+                    VBS.file:write("Property "..kyw.." "..name.."("..(...)..")\n\t")
+                else
+                    error("Property Type '"..typ.."' dont exist.")
+                end
+            end
+        end
+        function VBS.EndClass()
+            VBS.file:write('End Class')
         end
     end
 

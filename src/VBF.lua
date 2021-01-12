@@ -38,4 +38,8 @@ function VBF.Split(varname, split)
     assert(VBS.file:write(varname.."=Split("..split..")", "Cannot open VBS, check if a proccess its using it"))
 end
 
+function VBF.CreateObject(varname, Object)
+    assert(VBS.file:write(varname.."=CreateObject("..Object..")", "Cannot open VBS, check if a proccess its using it"))
+end
+
 return VBF
